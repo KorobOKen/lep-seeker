@@ -34,7 +34,8 @@ pub fn get_points_map(width: u32, height: u32, corners: Vec<Corner>) -> GrayImag
   if let MinMax(min, max) = min_max_score {
     let multiplier = 255f32 / (max - min);
     for corner in corners.into_iter() {
-      let pixel_value = 255 - ((corner.score as f32 - min) * multiplier) as u8;
+      //let pixel_value = 255u8 - ((corner.score as f32) * multiplier).round() as u8;
+      let pixel_value = 0;
       map.put_pixel(corner.x, corner.y, Luma([pixel_value]));
     }
   }
