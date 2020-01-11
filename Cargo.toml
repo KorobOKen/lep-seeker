@@ -1,0 +1,7 @@
+[package]
+name = "lep-finder"
+version = "0.1.0"
+authors = ["dmitriykorobkov <korob_ok.exe@mail.ru>"]
+edition = "2018"
+
+[dependencies]
