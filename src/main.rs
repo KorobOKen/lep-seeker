@@ -13,7 +13,7 @@ fn main() {
     println!("{:?}", &os_path);
     if let Some(luma) = get_luma_by_path(&os_path) {
       println!("luma for {:?} calculated", &os_path);
-      let corners9 = corners_fast9(&luma, 80);
+      let corners9 = corners_fast9(&luma, 70);
       println!("Corners 9 amount: {}", corners9.len());
 //      let corners12 = corners_fast12(&luma, 100);
 //      println!("Corners 12 amount: {}", corners12.len());
@@ -22,6 +22,7 @@ fn main() {
         luma.height(),
         corners9,
       );
+      println!("Points map built");
       let result_path = Path::new(".")
         .join("pics")
         .join("results")

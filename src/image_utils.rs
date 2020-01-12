@@ -2,12 +2,14 @@ extern crate image;
 extern crate imageproc;
 extern crate itertools;
 
-use image::{GrayImage, Luma};
+use image::{GrayAlphaImage, GrayImage, LumaA};
 use std::path::Path;
 use imageproc::corners::Corner;
+use imageproc::drawing::draw_filled_circle_mut;
 use std::cmp::Ordering;
 use itertools::Itertools;
 use itertools::MinMaxResult::*;
+use self::image::ImageBuffer;
 
 pub fn get_luma_by_path<P: AsRef<Path>>(path: P) -> Option<GrayImage> {
   match image::open(&path) {
@@ -20,7 +22,7 @@ pub fn get_luma_by_path<P: AsRef<Path>>(path: P) -> Option<GrayImage> {
   }
 }
 
-pub fn get_points_map(width: u32, height: u32, corners: Vec<Corner>) -> GrayImage {
+pub fn get_points_map(width: u32, height: u32, corners: Vec<Corner>) -> GrayAlphaImage {
   let min_max_score = corners
     .iter()
     .map(|corner| corner.score)
@@ -28,15 +30,23 @@ pub fn get_points_map(width: u32, height: u32, corners: Vec<Corner>) -> GrayImag
       a.partial_cmp(b).unwrap_or(Ordering::Equal)
     );
 
-  let white_pixels = vec![255u8; (width * height) as usize];
-  let mut map = GrayImage::from_raw(width, height, white_pixels).unwrap();
+  let white_pixels = vec![255u8; (width * height * 2) as usize];
+  let mut map = ImageBuffer::from_raw(width, height, white_pixels).unwrap();
 
   if let MinMax(min, max) = min_max_score {
     let multiplier = 255f32 / (max - min);
     for corner in corners.into_iter() {
-      //let pixel_value = 255u8 - ((corner.score as f32) * multiplier).round() as u8;
-      let pixel_value = 0;
-      map.put_pixel(corner.x, corner.y, Luma([pixel_value]));
+      let pixel_value = 255u8 - ((corner.score as f32 - min) * multiplier).round() as u8;
+      //let pixel_value = 0;
+      let radius = match &pixel_value {
+        v if *v < 40 => 5,
+        v if *v < 70 => 4,
+        v if *v < 110 => 3,
+        v if *v < 155 => 2,
+        _ => 1
+      };
+      draw_filled_circle_mut(&mut map, (corner.x as i32, corner.y as i32), radius, LumaA([0, 255u8]));
+      //map.put_pixel(corner.x, corner.y, Luma([pixel_value]));
     }
   }
 
