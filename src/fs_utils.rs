@@ -1,10 +1,9 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs;
 use std::io::Result;
-use std::ffi::OsString;
 use std::error::Error;
 
-pub fn get_sources_paths() -> Option<Vec<OsString>> {
+pub fn get_sources_paths() -> Option<Vec<PathBuf>> {
   let sources_path = Path::new(".")
     .join("pics")
     .join("sources");
@@ -13,7 +12,7 @@ pub fn get_sources_paths() -> Option<Vec<OsString>> {
 
   if let Err(why) = rd {
     println!("Ошибка при чтении папки '{:?}': {}", sources_path.into_os_string(), why);
-    return None
+    return None;
   }
 
   let (paths, errors) = rd.unwrap()
@@ -27,11 +26,7 @@ pub fn get_sources_paths() -> Option<Vec<OsString>> {
 
   let paths_vector = paths
     .into_iter()
-    .map(|dir_entry| dir_entry
-      .unwrap()
-      .path()
-      .into_os_string()
-    )
+    .map(|dir_entry| dir_entry.unwrap().path())
     .collect::<Vec<_>>();
 
   Some(paths_vector)

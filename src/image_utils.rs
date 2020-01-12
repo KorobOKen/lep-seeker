@@ -2,14 +2,13 @@ extern crate image;
 extern crate imageproc;
 extern crate itertools;
 
-use image::{GrayAlphaImage, GrayImage, LumaA};
+use image::{GrayAlphaImage, GrayImage, LumaA, ImageBuffer};
 use std::path::Path;
 use imageproc::corners::Corner;
 use imageproc::drawing::draw_filled_circle_mut;
 use std::cmp::Ordering;
 use itertools::Itertools;
 use itertools::MinMaxResult::*;
-use self::image::ImageBuffer;
 
 pub fn get_luma_by_path<P: AsRef<Path>>(path: P) -> Option<GrayImage> {
   match image::open(&path) {
@@ -37,16 +36,19 @@ pub fn get_points_map(width: u32, height: u32, corners: Vec<Corner>) -> GrayAlph
     let multiplier = 255f32 / (max - min);
     for corner in corners.into_iter() {
       let pixel_value = 255u8 - ((corner.score as f32 - min) * multiplier).round() as u8;
-      //let pixel_value = 0;
+      let color = LumaA([pixel_value, 255 - pixel_value]);
       let radius = match &pixel_value {
         v if *v < 40 => 5,
         v if *v < 70 => 4,
         v if *v < 110 => 3,
         v if *v < 155 => 2,
-        _ => 1
+        v if *v < 190 => 1,
+        _ => {
+          map.put_pixel(corner.x, corner.y, color);
+          continue;
+        }
       };
-      draw_filled_circle_mut(&mut map, (corner.x as i32, corner.y as i32), radius, LumaA([0, 255u8]));
-      //map.put_pixel(corner.x, corner.y, Luma([pixel_value]));
+      draw_filled_circle_mut(&mut map, (corner.x as i32, corner.y as i32), radius, color);
     }
   }
 
