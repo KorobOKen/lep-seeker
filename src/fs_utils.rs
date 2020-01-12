@@ -5,8 +5,7 @@ use std::error::Error;
 
 pub fn get_sources_paths() -> Option<Vec<PathBuf>> {
   let sources_path = Path::new(".")
-    .join("pics")
-    .join("sources");
+    .join("pics");
 
   let rd = fs::read_dir(&sources_path);
 

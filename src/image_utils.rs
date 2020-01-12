@@ -9,6 +9,7 @@ use imageproc::drawing::draw_filled_circle_mut;
 use std::cmp::Ordering;
 use itertools::Itertools;
 use itertools::MinMaxResult::*;
+use self::image::RgbImage;
 
 pub fn get_luma_by_path<P: AsRef<Path>>(path: P) -> Option<GrayImage> {
   match image::open(&path) {
@@ -18,6 +19,17 @@ pub fn get_luma_by_path<P: AsRef<Path>>(path: P) -> Option<GrayImage> {
       None
     }
     Ok(image) => Some(image.to_luma())
+  }
+}
+
+pub fn get_rgb_by_path<P: AsRef<Path>>(path: P) -> Option<RgbImage> {
+  match image::open(&path) {
+    Err(why) => {
+      let path_string = path.as_ref().as_os_str().to_string_lossy();
+      println!("Ошибка обработки изображения {}: {}", path_string, why);
+      None
+    }
+    Ok(image) => Some(image.to_rgb())
   }
 }
 
@@ -38,11 +50,11 @@ pub fn get_points_map(width: u32, height: u32, corners: Vec<Corner>) -> GrayAlph
       let pixel_value = 255u8 - ((corner.score as f32 - min) * multiplier).round() as u8;
       let color = LumaA([pixel_value, 255 - pixel_value]);
       let radius = match &pixel_value {
-        v if *v < 40 => 5,
-        v if *v < 70 => 4,
-        v if *v < 110 => 3,
-        v if *v < 155 => 2,
-        v if *v < 190 => 1,
+        0..=39 => 5,
+        40..=69 => 4,
+        70..=119 => 3,
+        120..=154 => 2,
+        155..=189 => 1,
         _ => {
           map.put_pixel(corner.x, corner.y, color);
           continue;
