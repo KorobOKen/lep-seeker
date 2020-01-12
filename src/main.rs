@@ -8,6 +8,7 @@ use imageproc::corners::corners_fast9;
 use std::path::{Path, PathBuf};
 use std::ffi::OsStr;
 use color_seek::get_color_map;
+use crate::color_seek::get_heat_map;
 
 fn main() {
   let paths = get_sources_paths();
@@ -34,6 +35,9 @@ fn main() {
       let map = get_color_map(&rgb);
       println!("color map for {} calculated", pic_name.to_string_lossy());
       map.save(get_result_full_path(pic_name, "hsv")).unwrap();
+      let map = get_heat_map(&rgb);
+      println!("heat map for {} calculated", pic_name.to_string_lossy());
+      map.save(get_result_full_path(pic_name, "heat")).unwrap();
     }
 
     println!();
